@@ -85,9 +85,9 @@ namespace ShowIt
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelOpacity;
+            selectedValue = ModConfig.Instance.ExtendedPanelOpacity > 0f ? ModConfig.Instance.ExtendedPanelOpacity : 0.95f;
 
-            group.AddSlider("Opacity", 0f, 1f, 0.05f, selectedValue, sel =>
+            group.AddSlider("Opacity", 0.05f, 1f, 0.05f, selectedValue, sel =>
             {
                 ModConfig.Instance.ExtendedPanelOpacity = sel;
                 ModConfig.Instance.Save();
@@ -101,7 +101,7 @@ namespace ShowIt
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartOverlayTextScale;
+            selectedValue = ModConfig.Instance.ExtendedPanelChartOverlayTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartOverlayTextScale : 0.7f;
 
             group.AddSlider("Chart Overlay Text Scale", 0.5f, 1.5f, 0.1f, selectedValue, sel =>
             {
@@ -109,7 +109,7 @@ namespace ShowIt
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartLegendTextScale;
+            selectedValue = ModConfig.Instance.ExtendedPanelChartLegendTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartLegendTextScale : 0.4f;
 
             group.AddSlider("Chart Legend Text Scale", 0.1f, 0.6f, 0.05f, selectedValue, sel =>
             {
@@ -117,7 +117,7 @@ namespace ShowIt
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartIconSize;
+            selectedValue = ModConfig.Instance.ExtendedPanelChartIconSize > 0f ? ModConfig.Instance.ExtendedPanelChartIconSize : 25f;
 
             group.AddSlider("Chart Icon Size", 15f, 40f, 2.5f, selectedValue, sel =>
             {
