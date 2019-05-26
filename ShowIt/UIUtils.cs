@@ -53,20 +53,5 @@ namespace ShowIt
 
             return radialChart;
         }
-
-        public static UIButton CreateButton(UIComponent parent, string name)
-        {
-            UIButton button = parent.AddUIComponent<UIButton>();
-            button.name = name;
-
-            button.size = new Vector3(90f, 30f);
-            button.textScale = 0.9f;
-            button.normalBgSprite = "ButtonMenu";
-            button.hoveredBgSprite = "ButtonMenuHovered";
-            button.pressedBgSprite = "ButtonMenuPressed";
-            button.canFocus = false;
-
-            return button;
-        }
     }
 }

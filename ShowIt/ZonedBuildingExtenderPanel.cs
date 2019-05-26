@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ShowIt
 {
-    class ZonedBuildingExtenderPanel : MonoBehaviour
+    public class ZonedBuildingExtenderPanel : MonoBehaviour
     {
         private bool _initialized;
         private ushort _cachedBuildingID;
@@ -22,55 +22,61 @@ namespace ShowIt
         private UISprite _effectChartHover;
         private Dictionary<int, UIRadialChart> _effectCharts;
         private Dictionary<int, UILabel> _effectOverlays;
-        private Dictionary<int, UILabel> _effectLegends;
         private Dictionary<int, UISprite> _effectIcons;
 
-        private void Update()
+        public void Awake()
         {
             try
             {
-                if (ModConfig.Instance.ConfigUpdated)
-                {
-                    if (_extenderPanel != null)
-                    {
-                        _extenderPanel.parent.isVisible = false;
-                        UnityEngine.Object.Destroy(_extenderPanel.gameObject);
-                    }
+                _effectsOnZonedBuilding = new Dictionary<int, float>();
+                _maxEffectsOnZonedBuilding = new Dictionary<int, float>();
+                _effectCharts = new Dictionary<int, UIRadialChart>();
+                _effectOverlays = new Dictionary<int, UILabel>();
+                _effectIcons = new Dictionary<int, UISprite>();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:Awake -> Exception: " + e.Message);
+            }
+        }
 
-                    _initialized = false;
-
-                    ModConfig.Instance.ConfigUpdated = false;
-                }
-
-                if (!_initialized)
+        public void Start()
+        {
+            try
+            {
+                if (_zonedBuildingWorldInfoPanel == null)
                 {
                     _zonedBuildingWorldInfoPanel = GameObject.Find("(Library) ZonedBuildingWorldInfoPanel").GetComponent<ZonedBuildingWorldInfoPanel>();
+                }
 
-                    if (_zonedBuildingWorldInfoPanel == null)
-                    {
-                        return;
-                    }
+                CreateUI();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:Start -> Exception: " + e.Message);
+            }
+        }
 
-                    _effectsOnZonedBuilding = new Dictionary<int, float>();
-                    _maxEffectsOnZonedBuilding = new Dictionary<int, float>();
-                    _effectChartHover = new UISprite();
-                    _effectCharts = new Dictionary<int, UIRadialChart>();
-                    _effectOverlays = new Dictionary<int, UILabel>();
-                    _effectLegends = new Dictionary<int, UILabel>();
-                    _effectIcons = new Dictionary<int, UISprite>();
-
-                    CreateExtenderPanel();
+        public void Update()
+        {
+            try
+            {
+                if (!_initialized || ModConfig.Instance.ConfigUpdated)
+                {
+                    UpdateUI();
 
                     _initialized = true;
+                    ModConfig.Instance.ConfigUpdated = false;
                 }
 
                 if (!_zonedBuildingWorldInfoPanel.component.isVisible)
                 {
                     _cachedBuildingID = 0;
-                    return;
                 }
-
-                UpdateBindings();
+                else
+                {
+                    UpdateBindings();
+                }
             }
             catch (Exception e)
             {
@@ -78,16 +84,28 @@ namespace ShowIt
             }
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
             try
             {
-                if (_extenderPanel == null)
+                for (var i = 0; i < 20; i++)
                 {
-                    return;
+                    Destroy(_effectCharts[i]);
+                    Destroy(_effectOverlays[i]);
+                    Destroy(_effectIcons[i]);
                 }
-
-                UnityEngine.Object.Destroy(_extenderPanel.gameObject);
+                if (_effectChartHover != null)
+                {
+                    Destroy(_effectChartHover);
+                }
+                if (_headingLabel != null)
+                {
+                    Destroy(_headingLabel);
+                }
+                if (_extenderPanel != null)
+                {
+                    Destroy(_extenderPanel);
+                }
             }
             catch (Exception e)
             {
@@ -95,12 +113,71 @@ namespace ShowIt
             }
         }
 
-        private void CreateExtenderPanel()
+        private void CreateUI()
         {
             try
             {
                 _extenderPanel = UIUtils.CreatePanel(_zonedBuildingWorldInfoPanel.component, "ShowItZonedBuildingExtenderPanel");
+                _extenderPanel.backgroundSprite = "SubcategoriesPanel";
+                _extenderPanel.eventMouseEnter += (component, eventParam) =>
+                {
+                    _extenderPanel.opacity = ModConfig.Instance.ExtendedPanelOpacityWhenHover;
+                };
+                _extenderPanel.eventMouseLeave += (component, eventParam) =>
+                {
+                    _extenderPanel.opacity = ModConfig.Instance.ExtendedPanelOpacity;
+                };
 
+                _headingLabel = UIUtils.CreateLabel(_extenderPanel, "ShowItZonedBuildingExtenderPanelHeading", "Indicators");
+                _headingLabel.textAlignment = UIHorizontalAlignment.Center;
+
+                _effectChartHover = UIUtils.CreateSprite(_extenderPanel, "ShowItZonedBuildingExtenderPanelEffectChartHover", "ToolbarIconGroup1Hovered");
+                _effectChartHover.size = new Vector3(55f, 55f);
+                _effectChartHover.isVisible = false;
+
+                UIRadialChart effectChart;
+                UILabel effectOverlay;
+                UISprite effectIcon;
+
+                for (var i = 0; i < 20; i++)
+                {
+                    effectChart = UIUtils.CreateTwoSlicedRadialChart(_extenderPanel, "ShowItZonedBuildingExtenderPanelEffectChart" + i);
+                    effectChart.eventMouseEnter += (component, eventParam) =>
+                    {
+                        _effectChartHover.relativePosition = new Vector3(component.relativePosition.x - 2.5f, component.relativePosition.y - 2.5f);
+                        _effectChartHover.isVisible = true;
+                    };
+                    effectChart.eventMouseLeave += (component, eventParam) =>
+                    {
+                        _effectChartHover.isVisible = false;
+                    };
+                    effectChart.eventClick += (component, eventParam) =>
+                    {
+                        InfoManager.InfoMode infoMode = InfoManager.InfoMode.LandValue;
+                        InfoManager.SubInfoMode subInfoMode = InfoManager.SubInfoMode.Default;
+                        GetEffectInfoModes((ImmaterialResourceManager.Resource)component.objectUserData, out infoMode, out subInfoMode);
+                        Singleton<InfoManager>.instance.SetCurrentMode(infoMode, subInfoMode);
+                    };
+                    _effectCharts.Add(i, effectChart);
+
+                    effectOverlay = UIUtils.CreateLabel(effectChart, "ShowItZonedBuildingExtenderPanelOverlayLabel" + i, "");
+                    effectOverlay.textAlignment = UIHorizontalAlignment.Center;
+                    _effectOverlays.Add(i, effectOverlay);
+
+                    effectIcon = UIUtils.CreateSprite(effectChart, "ShowItZonedBuildingExtenderPanelIconSprite" + i, "");
+                    _effectIcons.Add(i, effectIcon);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:CreateUI -> Exception: " + e.Message);
+            }
+        }
+
+        private void UpdateUI()
+        {
+            try
+            {
                 int columns;
                 float gap;
                 float separator;
@@ -108,101 +185,51 @@ namespace ShowIt
                 if (ModConfig.Instance.ExtendedPanelAlignment is "Bottom")
                 {
                     _extenderPanel.AlignTo(_extenderPanel.parent, UIAlignAnchor.BottomLeft);
-                    _extenderPanel.relativePosition = new Vector3(0f, _extenderPanel.parent.height - 15f);
                     _extenderPanel.width = _extenderPanel.parent.width;
                     _extenderPanel.height = 350f;
+                    _extenderPanel.relativePosition = new Vector3(0f, _extenderPanel.parent.height - 15f);
+
                     columns = 6;
                     separator = 23;
-                    gap = 32;
+                    gap = 20;
                 }
                 else
                 {
                     _extenderPanel.AlignTo(_extenderPanel.parent, UIAlignAnchor.TopRight);
-                    _extenderPanel.relativePosition = new Vector3(_extenderPanel.parent.width + 1f, 0f);
                     _extenderPanel.width = 340f;
                     _extenderPanel.height = _extenderPanel.parent.height - 15f;
+                    _extenderPanel.relativePosition = new Vector3(_extenderPanel.parent.width + 1f, 0f);
+
                     columns = 5;
                     separator = 15;
                     gap = 10;
                 }
 
-                _extenderPanel.backgroundSprite = ModConfig.Instance.ExtendedPanelBackgroundSprite ?? "InfoBubbleService";
-                _extenderPanel.opacity = ModConfig.Instance.ExtendedPanelOpacity > 0f ? ModConfig.Instance.ExtendedPanelOpacity : 0.95f;
+                _extenderPanel.opacity = ModConfig.Instance.ExtendedPanelOpacity;
 
-                _headingLabel = UIUtils.CreateLabel(_extenderPanel, "ShowItZonedBuildingExtenderPanelHeading", "Indicators");
-                _headingLabel.textAlignment = UIHorizontalAlignment.Center;
-                _headingLabel.position = new Vector3(_extenderPanel.width / 2f - _headingLabel.width / 2f, _headingLabel.height / 2f - 20f);
+                _headingLabel.relativePosition = new Vector3(_extenderPanel.width / 2f - _headingLabel.width / 2f, _headingLabel.height / 2f + 5f);
 
-                _effectChartHover = UIUtils.CreateSprite(_extenderPanel, "ShowItZonedBuildingExtenderPanelEffectChartHover", "ToolbarIconGroup1Hovered");
-                _effectChartHover.size = new Vector3(55f, 60f);
-                _effectChartHover.isVisible = false;
-
-                UIRadialChart impactChart;
-                UILabel impactOverlay;
-                UILabel impactLegend;
-                UISprite impactIcon;
+                UIRadialChart effectChart;
+                UILabel effectOverlay;
+                UISprite effectIcon;
 
                 for (var i = 0; i < 20; i++)
                 {
-                    impactChart = UIUtils.CreateTwoSlicedRadialChart(_extenderPanel, "ShowItZonedBuildingExtenderPanelEffectChart" + i);
-                    impactChart.AlignTo(_extenderPanel, UIAlignAnchor.TopRight);
-                    impactChart.relativePosition = new Vector3((float)separator + i % columns * (impactChart.width + separator), (float)(separator + impactChart.width) + i / columns * (separator + impactChart.width) - gap);
-                    impactChart.eventMouseEnter += new MouseEventHandler(this.OnImpactChartEnter);
-                    impactChart.eventMouseLeave += new MouseEventHandler(this.OnImpactChartLeave);
-                    impactChart.eventClick += new MouseEventHandler(this.OnImpactChartClick);
-                    _effectCharts.Add(i, impactChart);
+                    effectChart = _effectCharts[i];
+                    effectChart.AlignTo(_extenderPanel, UIAlignAnchor.TopRight);
+                    effectChart.relativePosition = new Vector3((float)separator + i % columns * (effectChart.width + separator), (float)(separator + effectChart.width) + i / columns * (separator + effectChart.width) - gap);
 
-                    impactOverlay = UIUtils.CreateLabel(impactChart, "ShowItZonedBuildingExtenderPanelOverlayLabel" + i, "");
-                    impactOverlay.textAlignment = UIHorizontalAlignment.Center;
-                    impactOverlay.textScale = ModConfig.Instance.ExtendedPanelChartOverlayTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartOverlayTextScale : 0.7f;
-                    _effectOverlays.Add(i, impactOverlay);
+                    effectOverlay = _effectOverlays[i];
+                    effectOverlay.textAlignment = UIHorizontalAlignment.Center;
+                    effectOverlay.textScale = ModConfig.Instance.ExtendedPanelChartOverlayTextScale;
 
-                    if (ModConfig.Instance.ExtendedPanelChartHelp is "Icon")
-                    {
-                        impactIcon = UIUtils.CreateSprite(impactChart, "ShowItZonedBuildingExtenderPanelIconSprite" + i, "");
-                        impactIcon.size = new Vector3(ModConfig.Instance.ExtendedPanelChartIconSize > 0f ? ModConfig.Instance.ExtendedPanelChartIconSize : 25f, ModConfig.Instance.ExtendedPanelChartIconSize > 0f ? ModConfig.Instance.ExtendedPanelChartIconSize : 25f);
-                        _effectIcons.Add(i, impactIcon);
-                    }
-                    else
-                    {
-                        impactLegend = UIUtils.CreateLabel(impactChart, "ShowItZonedBuildingExtenderPanelLegendLabel" + i, "");
-                        impactLegend.textAlignment = UIHorizontalAlignment.Center;
-                        impactLegend.textScale = ModConfig.Instance.ExtendedPanelChartLegendTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartLegendTextScale : 0.4f;
-                        _effectLegends.Add(i, impactLegend);
-                    }
+                    effectIcon = _effectIcons[i];
+                    effectIcon.size = new Vector3(ModConfig.Instance.ExtendedPanelChartIconSize, ModConfig.Instance.ExtendedPanelChartIconSize);
                 }
             }
             catch (Exception e)
             {
-                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:CreateExtenderPanel -> Exception: " + e.Message);
-            }
-        }
-
-        private void OnImpactChartEnter(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            _effectChartHover.relativePosition = new Vector3(component.position.x - 2.5f, 0 - component.position.y - 5f);
-            _effectChartHover.isVisible = true;
-        }
-
-        private void OnImpactChartLeave(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            _effectChartHover.isVisible = false;
-        }
-
-        private void OnImpactChartClick(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            try
-            {
-                InfoManager.InfoMode infoMode = InfoManager.InfoMode.LandValue;
-                InfoManager.SubInfoMode subInfoMode = InfoManager.SubInfoMode.Default;
-
-                GetEffectInfoModes((ImmaterialResourceManager.Resource)component.objectUserData, out infoMode, out subInfoMode);
-
-                Singleton<InfoManager>.instance.SetCurrentMode(infoMode, subInfoMode);
-            }
-            catch (Exception e)
-            {
-                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:OnImpactChartClick -> Exception: " + e.Message);
+                Debug.Log("[Show It!] ZonedBuildingExtenderPanel:UpdateUI -> Exception: " + e.Message);
             }
         }
 
@@ -223,7 +250,7 @@ namespace ShowIt
                     _effectsOnZonedBuilding.Clear();
                     _maxEffectsOnZonedBuilding.Clear();
 
-                    float impact;
+                    float effect;
                     float maxEffect;
 
                     for (var i = 0; i < ImmaterialResourceManager.RESOURCE_COUNT; i++)
@@ -232,29 +259,29 @@ namespace ShowIt
                         {
                             case ItemClass.Zone.ResidentialHigh:
                             case ItemClass.Zone.ResidentialLow:
-                                impact = ResidentialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
+                                effect = ResidentialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
                                 maxEffect = ResidentialBuildingHelper.GetMaxEffect((ImmaterialResourceManager.Resource)i);
                                 break;
                             case ItemClass.Zone.Industrial:
-                                impact = IndustrialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
+                                effect = IndustrialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
                                 maxEffect = IndustrialBuildingHelper.GetMaxEffect((ImmaterialResourceManager.Resource)i);
                                 break;
                             case ItemClass.Zone.CommercialHigh:
                             case ItemClass.Zone.CommercialLow:
-                                impact = CommercialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
+                                effect = CommercialBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
                                 maxEffect = CommercialBuildingHelper.GetMaxEffect((ImmaterialResourceManager.Resource)i);
                                 break;
                             case ItemClass.Zone.Office:
-                                impact = OfficeBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
+                                effect = OfficeBuildingHelper.CalculateResourceEffect(buildingId, ref building, (ImmaterialResourceManager.Resource)i);
                                 maxEffect = OfficeBuildingHelper.GetMaxEffect((ImmaterialResourceManager.Resource)i);
                                 break;
                             default:
-                                impact = 0;
+                                effect = 0;
                                 maxEffect = 0;
                                 break;
                         }
 
-                        _effectsOnZonedBuilding.Add(i, impact);
+                        _effectsOnZonedBuilding.Add(i, effect);
                         _maxEffectsOnZonedBuilding.Add(i, maxEffect);
                     }
 
@@ -431,11 +458,6 @@ namespace ShowIt
                     overlay.isVisible = true;
                 }
 
-                foreach (UILabel legend in _effectLegends.Values)
-                {
-                    legend.isVisible = true;
-                }
-
                 foreach (UISprite icon in _effectIcons.Values)
                 {
                     icon.isVisible = true;
@@ -447,7 +469,7 @@ namespace ShowIt
             }
         }
 
-        private void SetEffectChart(int position, ImmaterialResourceManager.Resource resource)
+        private void SetEffectChart(int index, ImmaterialResourceManager.Resource resource)
         {
             try
             {
@@ -474,26 +496,19 @@ namespace ShowIt
                     color = IsEffectPositive(resource) ? colorRed : colorRed;
                 }
 
-                _effectCharts[position].GetSlice(0).outterColor = color;
-                _effectCharts[position].GetSlice(0).innerColor = color;
+                _effectCharts[index].GetSlice(0).outterColor = color;
+                _effectCharts[index].GetSlice(0).innerColor = color;
 
-                _effectCharts[position].SetValues(resourceEffectPercentage, 1 - resourceEffectPercentage);
-                _effectCharts[position].tooltip = GetEffectLongName(resource);
-                _effectCharts[position].objectUserData = resource;
+                _effectCharts[index].SetValues(resourceEffectPercentage, 1 - resourceEffectPercentage);
+                _effectCharts[index].tooltip = GetEffectLongName(resource);
+                _effectCharts[index].objectUserData = resource;
 
-                _effectOverlays[position].text = $"{Math.Round(resourceEffectPercentage * 100f),1}%";
-                _effectOverlays[position].position = new Vector3(_effectCharts[position].width / 2f - _effectOverlays[position].width / 2f + 3f, _effectOverlays[position].height / 2f - 29.5f);
+                _effectOverlays[index].text = $"{Math.Round(resourceEffectPercentage * 100f),1}%";
+                _effectOverlays[index].relativePosition = new Vector3(_effectCharts[index].width / 2f - _effectOverlays[index].width / 2f, _effectCharts[index].height / 2f - _effectOverlays[index].height / 2f);
 
-                if (ModConfig.Instance.ExtendedPanelChartHelp is "Icon")
-                {
-                    _effectIcons[position].spriteName = GetEffectSprite(resource);
-                    _effectIcons[position].position = new Vector3(_effectCharts[position].width / 2f - _effectIcons[position].width / 2f, _effectIcons[position].height / 2f - 50f);
-                }
-                else
-                {
-                    _effectLegends[position].text = GetEffectShortName(resource);
-                    _effectLegends[position].position = new Vector3(_effectCharts[position].width / 2f - _effectLegends[position].width / 2f, _effectLegends[position].height / 2f - 55f);
-                }
+                _effectIcons[index].spriteName = GetEffectSprite(resource);
+                _effectIcons[index].relativePosition = new Vector3(_effectCharts[index].width / 2f - _effectIcons[index].width / 2f, _effectIcons[index].height / 2f + _effectCharts[index].height / 2);
+
             }
             catch (Exception e)
             {
@@ -517,6 +532,8 @@ namespace ShowIt
                     return true;
                 case ImmaterialResourceManager.Resource.EducationUniversity:
                     return true;
+                case ImmaterialResourceManager.Resource.EducationLibrary:
+                    return true;
                 case ImmaterialResourceManager.Resource.DeathCare:
                     return true;
                 case ImmaterialResourceManager.Resource.PublicTransport:
@@ -561,69 +578,6 @@ namespace ShowIt
                     return false;
                 default:
                     return false;
-            }
-        }
-
-        private string GetEffectShortName(ImmaterialResourceManager.Resource resource)
-        {
-            switch (resource)
-            {
-                case ImmaterialResourceManager.Resource.HealthCare:
-                    return "Health Care";
-                case ImmaterialResourceManager.Resource.FireDepartment:
-                    return "Fire Dep.";
-                case ImmaterialResourceManager.Resource.PoliceDepartment:
-                    return "Police Dep.";
-                case ImmaterialResourceManager.Resource.EducationElementary:
-                    return "Elementary";
-                case ImmaterialResourceManager.Resource.EducationHighSchool:
-                    return "High School";
-                case ImmaterialResourceManager.Resource.EducationUniversity:
-                    return "University";
-                case ImmaterialResourceManager.Resource.DeathCare:
-                    return "Death Care";
-                case ImmaterialResourceManager.Resource.PublicTransport:
-                    return "Public Trans.";
-                case ImmaterialResourceManager.Resource.NoisePollution:
-                    return "Noise";
-                case ImmaterialResourceManager.Resource.CrimeRate:
-                    return "Crime";
-                case ImmaterialResourceManager.Resource.Health:
-                    return "Health";
-                case ImmaterialResourceManager.Resource.Wellbeing:
-                    return "Wellbeing";
-                case ImmaterialResourceManager.Resource.Density:
-                    return "Density";
-                case ImmaterialResourceManager.Resource.Entertainment:
-                    return "Entertainment";
-                case ImmaterialResourceManager.Resource.LandValue:
-                    return "Land Value";
-                case ImmaterialResourceManager.Resource.Attractiveness:
-                    return "Attractiveness";
-                case ImmaterialResourceManager.Resource.Coverage:
-                    return "Coverage";
-                case ImmaterialResourceManager.Resource.FireHazard:
-                    return "Fire Hazard";
-                case ImmaterialResourceManager.Resource.Abandonment:
-                    return "Abandonment";
-                case ImmaterialResourceManager.Resource.CargoTransport:
-                    return "Cargo Trans.";
-                case ImmaterialResourceManager.Resource.RadioCoverage:
-                    return "Radio Cov.";
-                case ImmaterialResourceManager.Resource.FirewatchCoverage:
-                    return "Firewatch Cov.";
-                case ImmaterialResourceManager.Resource.EarthquakeCoverage:
-                    return "Earthquake Cov.";
-                case ImmaterialResourceManager.Resource.DisasterCoverage:
-                    return "Disaster Cov.";
-                case ImmaterialResourceManager.Resource.TourCoverage:
-                    return "Tour Cov.";
-                case ImmaterialResourceManager.Resource.PostService:
-                    return "Post Service";
-                case ImmaterialResourceManager.Resource.None:
-                    return "None";
-                default:
-                    return "Unknown";
             }
         }
 
@@ -643,6 +597,8 @@ namespace ShowIt
                     return "High School";
                 case ImmaterialResourceManager.Resource.EducationUniversity:
                     return "University";
+                case ImmaterialResourceManager.Resource.EducationLibrary:
+                    return "Library";
                 case ImmaterialResourceManager.Resource.DeathCare:
                     return "Death Care";
                 case ImmaterialResourceManager.Resource.PublicTransport:
@@ -705,6 +661,8 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationHighSchool:
                     return "ToolbarIconEducation";
                 case ImmaterialResourceManager.Resource.EducationUniversity:
+                    return "ToolbarIconEducation";
+                case ImmaterialResourceManager.Resource.EducationLibrary:
                     return "ToolbarIconEducation";
                 case ImmaterialResourceManager.Resource.DeathCare:
                     return "NotificationIconDead";
@@ -783,6 +741,10 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationUniversity:
                     infoMode = InfoManager.InfoMode.Education;
                     subInfoMode = InfoManager.SubInfoMode.University;
+                    break;
+                case ImmaterialResourceManager.Resource.EducationLibrary:
+                    infoMode = InfoManager.InfoMode.Education;
+                    subInfoMode = InfoManager.SubInfoMode.LibraryEducation;
                     break;
                 case ImmaterialResourceManager.Resource.DeathCare:
                     infoMode = InfoManager.InfoMode.Health;

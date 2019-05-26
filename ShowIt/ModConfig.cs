@@ -4,13 +4,11 @@
     public class ModConfig
     {
         public bool ConfigUpdated { get; set; }
-        public string ExtendedPanelAlignment { get; set; }
-        public string ExtendedPanelBackgroundSprite { get; set; }
-        public float ExtendedPanelOpacity { get; set; }
-        public string ExtendedPanelChartHelp { get; set; }
-        public float ExtendedPanelChartOverlayTextScale { get; set; }
-        public float ExtendedPanelChartLegendTextScale { get; set; }
-        public float ExtendedPanelChartIconSize { get; set; }
+        public string ExtendedPanelAlignment { get; set; } = "Right";
+        public float ExtendedPanelOpacity { get; set; } = 0.75f;
+        public float ExtendedPanelOpacityWhenHover { get; set; } = 0.95f;
+        public float ExtendedPanelChartOverlayTextScale { get; set; } = 0.75f;
+        public float ExtendedPanelChartIconSize { get; set; } = 25f;
 
         private static ModConfig instance;
 

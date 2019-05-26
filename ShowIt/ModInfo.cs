@@ -20,48 +20,6 @@ namespace ShowIt
             "Bottom"
         };
 
-        private static readonly string[] ExtendedPanelBackgroundSpriteLabels =
-        {
-            "Generic Panel",
-            "Info Bubble",
-            "Info Bubble Service",
-            "Info Display",
-            "Info Panel",
-            "Menu Container",
-            "Menu Panel 1",
-            "Menu Panel 2",
-            "Subcategories Panel",
-            "UnlockingPanel 1",
-            "UnlockingPanel 2"
-        };
-
-        private static readonly string[] ExtendedPanelBackgroundSpriteValues =
-        {
-            "GenericPanel",
-            "InfoBubble",
-            "InfoBubbleService",
-            "InfoDisplay",
-            "InfoPanel",
-            "MenuContainer",
-            "MenuPanel1",
-            "MenuPanel2",
-            "SubcategoriesPanel",
-            "UnlockingPanel1",
-            "UnlockingPanel2"
-        };
-
-        private static readonly string[] ExtendedPanelChartHelpLabels =
-        {
-            "Text",
-            "Icon"
-        };
-
-        private static readonly string[] ExtendedPanelChartHelpValues =
-        {
-            "Text",
-            "Icon"
-        };
-
         public void OnSettingsUI(UIHelperBase helper)
         {
             UIHelperBase group = helper.AddGroup(Name);
@@ -70,56 +28,35 @@ namespace ShowIt
             float selectedValue;
 
             selectedIndex = GetSelectedOptionIndex(ExtendedPanelAlignmentValues, ModConfig.Instance.ExtendedPanelAlignment);
-
             group.AddDropdown("Alignment", ExtendedPanelAlignmentLabels, selectedIndex, sel =>
             {
                 ModConfig.Instance.ExtendedPanelAlignment = ExtendedPanelAlignmentValues[sel];
                 ModConfig.Instance.Save();
             });
 
-            selectedIndex = GetSelectedOptionIndex(ExtendedPanelBackgroundSpriteValues, ModConfig.Instance.ExtendedPanelBackgroundSprite);
-
-            group.AddDropdown("Background Sprite", ExtendedPanelBackgroundSpriteLabels, selectedIndex, sel =>
-            {
-                ModConfig.Instance.ExtendedPanelBackgroundSprite = ExtendedPanelBackgroundSpriteValues[sel];
-                ModConfig.Instance.Save();
-            });
-
-            selectedValue = ModConfig.Instance.ExtendedPanelOpacity > 0f ? ModConfig.Instance.ExtendedPanelOpacity : 0.95f;
-
-            group.AddSlider("Opacity", 0.05f, 1f, 0.05f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.ExtendedPanelOpacity;
+            group.AddSlider("Opacity", 0.5f, 1f, 0.05f, selectedValue, sel =>
             {
                 ModConfig.Instance.ExtendedPanelOpacity = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedIndex = GetSelectedOptionIndex(ExtendedPanelChartHelpValues, ModConfig.Instance.ExtendedPanelChartHelp);
-
-            group.AddDropdown("Chart Help", ExtendedPanelChartHelpLabels, selectedIndex, sel =>
+            selectedValue = ModConfig.Instance.ExtendedPanelOpacityWhenHover;
+            group.AddSlider("Opacity When Hover", 0.5f, 1f, 0.05f, selectedValue, sel =>
             {
-                ModConfig.Instance.ExtendedPanelChartHelp = ExtendedPanelChartHelpValues[sel];
+                ModConfig.Instance.ExtendedPanelOpacityWhenHover = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartOverlayTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartOverlayTextScale : 0.7f;
-
-            group.AddSlider("Chart Overlay Text Scale", 0.5f, 1.5f, 0.1f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.ExtendedPanelChartOverlayTextScale;
+            group.AddSlider("Chart Overlay Text Scale", 0.5f, 1.0f, 0.05f, selectedValue, sel =>
             {
                 ModConfig.Instance.ExtendedPanelChartOverlayTextScale = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartLegendTextScale > 0f ? ModConfig.Instance.ExtendedPanelChartLegendTextScale : 0.4f;
-
-            group.AddSlider("Chart Legend Text Scale", 0.1f, 0.6f, 0.05f, selectedValue, sel =>
-            {
-                ModConfig.Instance.ExtendedPanelChartLegendTextScale = sel;
-                ModConfig.Instance.Save();
-            });
-
-            selectedValue = ModConfig.Instance.ExtendedPanelChartIconSize > 0f ? ModConfig.Instance.ExtendedPanelChartIconSize : 25f;
-
-            group.AddSlider("Chart Icon Size", 15f, 40f, 2.5f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.ExtendedPanelChartIconSize;
+            group.AddSlider("Chart Icon Size", 20f, 30f, 1.0f, selectedValue, sel =>
             {
                 ModConfig.Instance.ExtendedPanelChartIconSize = sel;
                 ModConfig.Instance.Save();

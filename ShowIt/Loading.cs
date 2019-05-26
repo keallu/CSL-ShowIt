@@ -6,10 +6,10 @@ using UnityEngine;
 namespace ShowIt
 {
 
-    public class Loader : LoadingExtensionBase
+    public class Loading : LoadingExtensionBase
     {        
         private LoadMode _loadMode;
-        private GameObject _gameObject;
+        private GameObject _zbepObject;
         
         public override void OnLevelLoaded(LoadMode mode)
         {
@@ -25,14 +25,14 @@ namespace ShowIt
                 UIView objectOfType = UnityEngine.Object.FindObjectOfType<UIView>();
                 if (objectOfType != null)
                 {
-                    _gameObject = new GameObject("ZonedBuildingExtenderPanel");
-                    _gameObject.transform.parent = objectOfType.transform;
-                    _gameObject.AddComponent<ZonedBuildingExtenderPanel>();
+                    _zbepObject = new GameObject("ShowItZonedBuildingExtenderPanel");
+                    _zbepObject.transform.parent = objectOfType.transform;
+                    _zbepObject.AddComponent<ZonedBuildingExtenderPanel>();
                 }
             }
             catch (Exception e)
             {
-                Debug.Log("[Show It!] Loader:OnLevelLoaded -> Exception: " + e.Message);
+                Debug.Log("[Show It!] Loading:OnLevelLoaded -> Exception: " + e.Message);
             }
         }
 
@@ -45,16 +45,14 @@ namespace ShowIt
                     return;
                 }
 
-                if (_gameObject == null)
+                if (_zbepObject != null)
                 {
-                    return;
+                    UnityEngine.Object.Destroy(_zbepObject);
                 }
-
-                UnityEngine.Object.Destroy(_gameObject);
             }
             catch (Exception e)
             {
-                Debug.Log("[Show It!] Loader:OnLevelUnloading -> Exception: " + e.Message);
+                Debug.Log("[Show It!] Loading:OnLevelUnloading -> Exception: " + e.Message);
             }
         }
     }
