@@ -24,12 +24,8 @@ namespace ShowIt
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 10, 100, 0, 100);
                 case ImmaterialResourceManager.Resource.CrimeRate:
-                    Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
-                    return ImmaterialResourceManager.CalculateResourceEffect(value, 10, 100, 0, 100);
                 case ImmaterialResourceManager.Resource.Health:
                 case ImmaterialResourceManager.Resource.Wellbeing:
-                    Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
-                    return ImmaterialResourceManager.CalculateResourceEffect(value, 60, 100, 0, 50);
                 case ImmaterialResourceManager.Resource.Density:
                     return 0;
                 case ImmaterialResourceManager.Resource.Entertainment:
@@ -37,11 +33,9 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 100, 500, 50, 100);
                 case ImmaterialResourceManager.Resource.LandValue:
                 case ImmaterialResourceManager.Resource.Attractiveness:
-                case ImmaterialResourceManager.Resource.Coverage:
-                    return 0;
+                case ImmaterialResourceManager.Resource.Coverage:                    
                 case ImmaterialResourceManager.Resource.FireHazard:
-                    Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
-                    return ImmaterialResourceManager.CalculateResourceEffect(value, 50, 100, 10, 50);
+                    return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 15, 50, 10, 20);
@@ -63,6 +57,9 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.PostService:
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 100, 500, 50, 100);
+                case ImmaterialResourceManager.Resource.EducationLibrary:
+                case ImmaterialResourceManager.Resource.ChildCare:
+                case ImmaterialResourceManager.Resource.ElderCare:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:
@@ -86,10 +83,8 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.NoisePollution:
                     return 100;
                 case ImmaterialResourceManager.Resource.CrimeRate:
-                    return 100;
                 case ImmaterialResourceManager.Resource.Health:
                 case ImmaterialResourceManager.Resource.Wellbeing:
-                    return 50;
                 case ImmaterialResourceManager.Resource.Density:
                     return 0;
                 case ImmaterialResourceManager.Resource.Entertainment:
@@ -98,7 +93,7 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.Attractiveness:
                 case ImmaterialResourceManager.Resource.Coverage:
                 case ImmaterialResourceManager.Resource.FireHazard:
-                    return 50;
+                    return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
                     return 20;
                 case ImmaterialResourceManager.Resource.CargoTransport:
@@ -115,6 +110,9 @@ namespace ShowIt
                     return 0;
                 case ImmaterialResourceManager.Resource.PostService:
                     return 100;
+                case ImmaterialResourceManager.Resource.EducationLibrary:
+                case ImmaterialResourceManager.Resource.ChildCare:
+                case ImmaterialResourceManager.Resource.ElderCare:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:

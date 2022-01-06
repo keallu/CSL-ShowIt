@@ -8,16 +8,30 @@ namespace ShowIt
         public string Name => "Show It!";
         public string Description => "Shows vital indicators for zoned buildings.";
 
-        private static readonly string[] ExtendedPanelAlignmentLabels =
+        private static readonly string[] IndicatorsPanelAlignmentLabels =
         {
             "Right",
             "Bottom"
         };
 
-        private static readonly string[] ExtendedPanelAlignmentValues =
+        private static readonly string[] IndicatorsPanelAlignmentValues =
         {
             "Right",
             "Bottom"
+        };
+        
+        private static readonly string[] IndicatorsPanelLegendLabels =
+         {
+            "Icons",
+            "Labels",
+            "Both"
+        };
+
+        private static readonly string[] IndicatorsPanelLegendValues =
+        {
+            "Icons",
+            "Labels",
+            "Both"
         };
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -27,38 +41,59 @@ namespace ShowIt
             int selectedIndex;
             float selectedValue;
 
-            selectedIndex = GetSelectedOptionIndex(ExtendedPanelAlignmentValues, ModConfig.Instance.ExtendedPanelAlignment);
-            group.AddDropdown("Alignment", ExtendedPanelAlignmentLabels, selectedIndex, sel =>
+            selectedIndex = GetSelectedOptionIndex(IndicatorsPanelAlignmentValues, ModConfig.Instance.IndicatorsPanelAlignment);
+            group.AddDropdown("Alignment", IndicatorsPanelAlignmentLabels, selectedIndex, sel =>
             {
-                ModConfig.Instance.ExtendedPanelAlignment = ExtendedPanelAlignmentValues[sel];
+                ModConfig.Instance.IndicatorsPanelAlignment = IndicatorsPanelAlignmentValues[sel];
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelOpacity;
-            group.AddSlider("Opacity", 0.5f, 1f, 0.05f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.IndicatorsPanelChartSize;
+            group.AddSlider("Chart Size", 35f, 65f, 0.5f, selectedValue, sel =>
             {
-                ModConfig.Instance.ExtendedPanelOpacity = sel;
+                ModConfig.Instance.IndicatorsPanelChartSize = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelOpacityWhenHover;
-            group.AddSlider("Opacity When Hover", 0.5f, 1f, 0.05f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.IndicatorsPanelChartHorizontalSpacing;
+            group.AddSlider("Chart Horizontal Spacing", 5f, 25f, 1f, selectedValue, sel =>
             {
-                ModConfig.Instance.ExtendedPanelOpacityWhenHover = sel;
+                ModConfig.Instance.IndicatorsPanelChartHorizontalSpacing = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartOverlayTextScale;
-            group.AddSlider("Chart Overlay Text Scale", 0.5f, 1.0f, 0.05f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.IndicatorsPanelChartVerticalSpacing;
+            group.AddSlider("Chart Vertical Spacing", 5f, 25f, 1f, selectedValue, sel =>
             {
-                ModConfig.Instance.ExtendedPanelChartOverlayTextScale = sel;
+                ModConfig.Instance.IndicatorsPanelChartVerticalSpacing = sel;
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.ExtendedPanelChartIconSize;
-            group.AddSlider("Chart Icon Size", 20f, 30f, 1.0f, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.IndicatorsPanelNumberTextScale;
+            group.AddSlider("Number Text Scale", 0.5f, 0.9f, 0.05f, selectedValue, sel =>
             {
-                ModConfig.Instance.ExtendedPanelChartIconSize = sel;
+                ModConfig.Instance.IndicatorsPanelNumberTextScale = sel;
+                ModConfig.Instance.Save();
+            });
+
+            selectedIndex = GetSelectedOptionIndex(IndicatorsPanelLegendValues, ModConfig.Instance.IndicatorsPanelLegend);
+            group.AddDropdown("Legend", IndicatorsPanelLegendLabels, selectedIndex, sel =>
+            {
+                ModConfig.Instance.IndicatorsPanelLegend = IndicatorsPanelLegendValues[sel];
+                ModConfig.Instance.Save();
+            });
+
+            selectedValue = ModConfig.Instance.IndicatorsPanelIconSize;
+            group.AddSlider("Icon Size", 15f, 25f, 0.5f, selectedValue, sel =>
+            {
+                ModConfig.Instance.IndicatorsPanelIconSize = sel;
+                ModConfig.Instance.Save();
+            });
+
+            selectedValue = ModConfig.Instance.IndicatorsPanelLabelTextScale;
+            group.AddSlider("Label Text Scale", 0.3f, 0.9f, 0.05f, selectedValue, sel =>
+            {
+                ModConfig.Instance.IndicatorsPanelLabelTextScale = sel;
                 ModConfig.Instance.Save();
             });
         }

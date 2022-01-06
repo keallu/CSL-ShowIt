@@ -1,34 +1,27 @@
-﻿using ColossalFramework.UI;
-using ICities;
+﻿using ICities;
 using System;
 using UnityEngine;
 
 namespace ShowIt
 {
-
     public class Loading : LoadingExtensionBase
-    {        
+    {
+        private GameObject _modManagerGameObject;
         private LoadMode _loadMode;
-        private GameObject _zbepObject;
-        
+
         public override void OnLevelLoaded(LoadMode mode)
         {
             try
             {
                 _loadMode = mode;
 
-                if (_loadMode != LoadMode.LoadGame && _loadMode != LoadMode.NewGame && _loadMode != LoadMode.NewGameFromScenario)
+                if (_loadMode != LoadMode.NewGame && _loadMode != LoadMode.LoadGame && _loadMode != LoadMode.NewGameFromScenario)
                 {
                     return;
                 }
 
-                UIView objectOfType = UnityEngine.Object.FindObjectOfType<UIView>();
-                if (objectOfType != null)
-                {
-                    _zbepObject = new GameObject("ShowItZonedBuildingExtenderPanel");
-                    _zbepObject.transform.parent = objectOfType.transform;
-                    _zbepObject.AddComponent<ZonedBuildingExtenderPanel>();
-                }
+                _modManagerGameObject = new GameObject("ShowItModManager");
+                _modManagerGameObject.AddComponent<ModManager>();
             }
             catch (Exception e)
             {
@@ -40,14 +33,14 @@ namespace ShowIt
         {
             try
             {
-                if (_loadMode != LoadMode.LoadGame && _loadMode != LoadMode.NewGame && _loadMode != LoadMode.NewGameFromScenario)
+                if (_loadMode != LoadMode.NewGame && _loadMode != LoadMode.LoadGame && _loadMode != LoadMode.NewGameFromScenario)
                 {
                     return;
                 }
 
-                if (_zbepObject != null)
+                if (_modManagerGameObject != null)
                 {
-                    UnityEngine.Object.Destroy(_zbepObject);
+                    UnityEngine.Object.Destroy(_modManagerGameObject);
                 }
             }
             catch (Exception e)
