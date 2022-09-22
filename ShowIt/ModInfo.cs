@@ -1,5 +1,6 @@
 ﻿using ICities;
 using System;
+using System.Reflection;
 
 namespace ShowIt
 {
@@ -19,7 +20,7 @@ namespace ShowIt
             "Right",
             "Bottom"
         };
-        
+
         private static readonly string[] IndicatorsPanelLegendLabels =
          {
             "Icons",
@@ -36,7 +37,11 @@ namespace ShowIt
 
         public void OnSettingsUI(UIHelperBase helper)
         {
-            UIHelperBase group = helper.AddGroup(Name);
+            UIHelperBase group;
+
+            AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
+
+            group = helper.AddGroup(Name + " - " + assemblyName.Version.Major + "." + assemblyName.Version.Minor);
 
             int selectedIndex;
             float selectedValue;
