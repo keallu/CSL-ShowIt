@@ -25,7 +25,7 @@ namespace ShowIt
         private Dictionary<int, float> _effectsOnZonedBuilding;
         private Dictionary<int, float> _maxEffectsOnZonedBuilding;
 
-        private const int MaxNumberOfCharts = 16;
+        private const int MaxNumberOfCharts = 17;
 
         public void Awake()
         {
@@ -95,8 +95,8 @@ namespace ShowIt
                 {
                     Destroy(_charts[i]);
                     Destroy(_numbers[i]);
-                    Destroy(_labels[i]);
                     Destroy(_icons[i]);
+                    Destroy(_labels[i]);
                 }
                 if (_header != null)
                 {
@@ -155,8 +155,13 @@ namespace ShowIt
                     {
                         InfoManager.InfoMode infoMode = InfoManager.InfoMode.LandValue;
                         InfoManager.SubInfoMode subInfoMode = InfoManager.SubInfoMode.Default;
+
                         GetIndicatorInfoModes((ImmaterialResourceManager.Resource)component.objectUserData, out infoMode, out subInfoMode);
-                        Singleton<InfoManager>.instance.SetCurrentMode(infoMode, subInfoMode);
+
+                        if (Singleton<InfoManager>.instance.IsInfoModeAvailable(infoMode))
+                        {
+                            Singleton<InfoManager>.instance.SetCurrentMode(infoMode, subInfoMode);
+                        }
                     };
                     _charts.Add(i, chart);
 
@@ -242,6 +247,27 @@ namespace ShowIt
             }
         }
 
+        private void SetCharts(ImmaterialResourceManager.Resource[] resources)
+        {
+            try
+            {
+                int chartIndex = 0;
+
+                for (var i = 0; i < resources.Length; i++)
+                {
+                    if (IsIndicatorAvailable(resources[i]))
+                    {
+                        SetChart(chartIndex, resources[i]);
+                        chartIndex++;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Show It!] ModManager:SetCharts -> Exception: " + e.Message);
+            }
+        }
+
         private void SetChart(int index, ImmaterialResourceManager.Resource resource)
         {
             try
@@ -280,9 +306,11 @@ namespace ShowIt
                 _charts[index].SetValues(resourceEffectPercentage, 1 - resourceEffectPercentage);
                 _charts[index].tooltip = GetIndicatorName(resource);
                 _charts[index].objectUserData = resource;
+                _charts[index].isVisible = true;
 
                 _numbers[index].text = $"{Math.Round(resourceEffectPercentage * 100f),1}%";
                 _numbers[index].relativePosition = new Vector3(_charts[index].width / 2f - _numbers[index].width / 2f, _charts[index].height / 2f - _numbers[index].height / 2f);
+                _numbers[index].isVisible = true;
 
                 _icons[index].spriteName = GetIndicatorSprite(resource);
                 _icons[index].tooltip = GetIndicatorName(resource);
@@ -292,13 +320,11 @@ namespace ShowIt
 
                 if (ModConfig.Instance.IndicatorsPanelLegend is "Icons")
                 {
-                    _labels[index].isVisible = false;
                     _icons[index].position = new Vector3(_charts[index].width / 2f - _icons[index].width / 2f, 0f - (ModConfig.Instance.IndicatorsPanelChartSize / 1.25f));
                     _icons[index].isVisible = true;
                 }
                 else if (ModConfig.Instance.IndicatorsPanelLegend is "Labels")
                 {
-                    _icons[index].isVisible = false;
                     _labels[index].position = new Vector3(_charts[index].width / 2f - _labels[index].width / 2f, 0f - ModConfig.Instance.IndicatorsPanelChartSize);
                     _labels[index].isVisible = true;
                 }
@@ -322,17 +348,22 @@ namespace ShowIt
             {
                 foreach (UIRadialChart chart in _charts.Values)
                 {
-                    chart.isVisible = true;
+                    chart.isVisible = false;
+                }
+
+                foreach (UILabel number in _numbers.Values)
+                {
+                    number.isVisible = false;
+                }
+
+                foreach (UISprite icon in _icons.Values)
+                {
+                    icon.isVisible = false;
                 }
 
                 foreach (UILabel label in _labels.Values)
                 {
-                    label.isVisible = true;
-                }
-
-                foreach (UILabel tooltip in _numbers.Values)
-                {
-                    tooltip.isVisible = true;
+                    label.isVisible = false;
                 }
             }
             catch (Exception e)
@@ -429,23 +460,25 @@ namespace ShowIt
         {
             try
             {
-                SetChart(0, ImmaterialResourceManager.Resource.HealthCare);
-                SetChart(1, ImmaterialResourceManager.Resource.DeathCare);
-                SetChart(2, ImmaterialResourceManager.Resource.FireDepartment);
-                SetChart(3, ImmaterialResourceManager.Resource.PoliceDepartment);
-                SetChart(4, ImmaterialResourceManager.Resource.EducationElementary);
-                SetChart(5, ImmaterialResourceManager.Resource.EducationHighSchool);
-                SetChart(6, ImmaterialResourceManager.Resource.EducationUniversity);
-                SetChart(7, ImmaterialResourceManager.Resource.PublicTransport);
-                SetChart(8, ImmaterialResourceManager.Resource.PostService);
-                SetChart(9, ImmaterialResourceManager.Resource.Entertainment);
-                SetChart(10, ImmaterialResourceManager.Resource.FirewatchCoverage);
-                SetChart(11, ImmaterialResourceManager.Resource.DisasterCoverage);
-                SetChart(12, ImmaterialResourceManager.Resource.RadioCoverage);
-                SetChart(13, ImmaterialResourceManager.Resource.NoisePollution);
-                SetChart(14, ImmaterialResourceManager.Resource.Abandonment);
+                ImmaterialResourceManager.Resource[] resources = new ImmaterialResourceManager.Resource[15];
 
-                _charts[15].isVisible = false;
+                resources[0] = ImmaterialResourceManager.Resource.HealthCare;
+                resources[1] = ImmaterialResourceManager.Resource.DeathCare;
+                resources[2] = ImmaterialResourceManager.Resource.FireDepartment;
+                resources[3] = ImmaterialResourceManager.Resource.PoliceDepartment;
+                resources[4] = ImmaterialResourceManager.Resource.EducationElementary;
+                resources[5] = ImmaterialResourceManager.Resource.EducationHighSchool;
+                resources[6] = ImmaterialResourceManager.Resource.EducationUniversity;
+                resources[7] = ImmaterialResourceManager.Resource.PublicTransport;
+                resources[8] = ImmaterialResourceManager.Resource.PostService;
+                resources[9] = ImmaterialResourceManager.Resource.Entertainment;
+                resources[10] = ImmaterialResourceManager.Resource.FirewatchCoverage;
+                resources[11] = ImmaterialResourceManager.Resource.DisasterCoverage;
+                resources[12] = ImmaterialResourceManager.Resource.RadioCoverage;
+                resources[13] = ImmaterialResourceManager.Resource.NoisePollution;
+                resources[14] = ImmaterialResourceManager.Resource.Abandonment;
+
+                SetCharts(resources);
             }
             catch (Exception e)
             {
@@ -457,23 +490,26 @@ namespace ShowIt
         {
             try
             {
-                SetChart(0, ImmaterialResourceManager.Resource.HealthCare);
-                SetChart(1, ImmaterialResourceManager.Resource.DeathCare);
-                SetChart(2, ImmaterialResourceManager.Resource.FireDepartment);
-                SetChart(3, ImmaterialResourceManager.Resource.PoliceDepartment);
-                SetChart(4, ImmaterialResourceManager.Resource.EducationElementary);
-                SetChart(5, ImmaterialResourceManager.Resource.EducationHighSchool);
-                SetChart(6, ImmaterialResourceManager.Resource.EducationUniversity);
-                SetChart(7, ImmaterialResourceManager.Resource.PublicTransport);
-                SetChart(8, ImmaterialResourceManager.Resource.PostService);
-                SetChart(9, ImmaterialResourceManager.Resource.Entertainment);
-                SetChart(10, ImmaterialResourceManager.Resource.FirewatchCoverage);
-                SetChart(11, ImmaterialResourceManager.Resource.DisasterCoverage);
-                SetChart(12, ImmaterialResourceManager.Resource.RadioCoverage);
-                SetChart(13, ImmaterialResourceManager.Resource.CargoTransport);
-                SetChart(14, ImmaterialResourceManager.Resource.NoisePollution);
-                SetChart(15, ImmaterialResourceManager.Resource.Abandonment);
+                ImmaterialResourceManager.Resource[] resources = new ImmaterialResourceManager.Resource[16];
 
+                resources[0] = ImmaterialResourceManager.Resource.HealthCare;
+                resources[1] = ImmaterialResourceManager.Resource.DeathCare;
+                resources[2] = ImmaterialResourceManager.Resource.FireDepartment;
+                resources[3] = ImmaterialResourceManager.Resource.PoliceDepartment;
+                resources[4] = ImmaterialResourceManager.Resource.EducationElementary;
+                resources[5] = ImmaterialResourceManager.Resource.EducationHighSchool;
+                resources[6] = ImmaterialResourceManager.Resource.EducationUniversity;
+                resources[7] = ImmaterialResourceManager.Resource.PublicTransport;
+                resources[8] = ImmaterialResourceManager.Resource.PostService;
+                resources[9] = ImmaterialResourceManager.Resource.Entertainment;
+                resources[10] = ImmaterialResourceManager.Resource.FirewatchCoverage;
+                resources[11] = ImmaterialResourceManager.Resource.DisasterCoverage;
+                resources[12] = ImmaterialResourceManager.Resource.RadioCoverage;
+                resources[13] = ImmaterialResourceManager.Resource.CargoTransport;
+                resources[14] = ImmaterialResourceManager.Resource.NoisePollution;
+                resources[15] = ImmaterialResourceManager.Resource.Abandonment;
+
+                SetCharts(resources);
             }
             catch (Exception e)
             {
@@ -485,22 +521,27 @@ namespace ShowIt
         {
             try
             {
-                SetChart(0, ImmaterialResourceManager.Resource.HealthCare);
-                SetChart(1, ImmaterialResourceManager.Resource.DeathCare);
-                SetChart(2, ImmaterialResourceManager.Resource.FireDepartment);
-                SetChart(3, ImmaterialResourceManager.Resource.PoliceDepartment);
-                SetChart(4, ImmaterialResourceManager.Resource.EducationElementary);
-                SetChart(5, ImmaterialResourceManager.Resource.EducationHighSchool);
-                SetChart(6, ImmaterialResourceManager.Resource.EducationUniversity);
-                SetChart(7, ImmaterialResourceManager.Resource.PublicTransport);
-                SetChart(8, ImmaterialResourceManager.Resource.PostService);
-                SetChart(9, ImmaterialResourceManager.Resource.Entertainment);
-                SetChart(10, ImmaterialResourceManager.Resource.FirewatchCoverage);
-                SetChart(11, ImmaterialResourceManager.Resource.DisasterCoverage);
-                SetChart(12, ImmaterialResourceManager.Resource.RadioCoverage);
-                SetChart(13, ImmaterialResourceManager.Resource.CargoTransport);
-                SetChart(14, ImmaterialResourceManager.Resource.NoisePollution);
-                SetChart(15, ImmaterialResourceManager.Resource.Abandonment);
+                ImmaterialResourceManager.Resource[] resources = new ImmaterialResourceManager.Resource[17];
+
+                resources[0] = ImmaterialResourceManager.Resource.HealthCare;
+                resources[1] = ImmaterialResourceManager.Resource.DeathCare;
+                resources[2] = ImmaterialResourceManager.Resource.FireDepartment;
+                resources[3] = ImmaterialResourceManager.Resource.PoliceDepartment;
+                resources[4] = ImmaterialResourceManager.Resource.EducationElementary;
+                resources[5] = ImmaterialResourceManager.Resource.EducationHighSchool;
+                resources[6] = ImmaterialResourceManager.Resource.EducationUniversity;
+                resources[7] = ImmaterialResourceManager.Resource.PublicTransport;
+                resources[8] = ImmaterialResourceManager.Resource.PostService;
+                resources[9] = ImmaterialResourceManager.Resource.Entertainment;
+                resources[10] = ImmaterialResourceManager.Resource.FirewatchCoverage;
+                resources[11] = ImmaterialResourceManager.Resource.DisasterCoverage;
+                resources[12] = ImmaterialResourceManager.Resource.RadioCoverage;
+                resources[13] = ImmaterialResourceManager.Resource.CargoTransport;
+                resources[14] = ImmaterialResourceManager.Resource.NoisePollution;
+                resources[15] = ImmaterialResourceManager.Resource.Abandonment;
+                resources[16] = ImmaterialResourceManager.Resource.CashCollecting;
+
+                SetCharts(resources);
             }
             catch (Exception e)
             {
@@ -512,28 +553,41 @@ namespace ShowIt
         {
             try
             {
-                SetChart(0, ImmaterialResourceManager.Resource.HealthCare);
-                SetChart(1, ImmaterialResourceManager.Resource.DeathCare);
-                SetChart(2, ImmaterialResourceManager.Resource.FireDepartment);
-                SetChart(3, ImmaterialResourceManager.Resource.PoliceDepartment);
-                SetChart(4, ImmaterialResourceManager.Resource.EducationElementary);
-                SetChart(5, ImmaterialResourceManager.Resource.EducationHighSchool);
-                SetChart(6, ImmaterialResourceManager.Resource.EducationUniversity);
-                SetChart(7, ImmaterialResourceManager.Resource.PublicTransport);
-                SetChart(8, ImmaterialResourceManager.Resource.PostService);
-                SetChart(9, ImmaterialResourceManager.Resource.Entertainment);
-                SetChart(10, ImmaterialResourceManager.Resource.FirewatchCoverage);
-                SetChart(11, ImmaterialResourceManager.Resource.DisasterCoverage);
-                SetChart(12, ImmaterialResourceManager.Resource.RadioCoverage);
-                SetChart(13, ImmaterialResourceManager.Resource.NoisePollution);
-                SetChart(14, ImmaterialResourceManager.Resource.Abandonment);
+                ImmaterialResourceManager.Resource[] resources = new ImmaterialResourceManager.Resource[15];
 
-                _charts[15].isVisible = false;
+                resources[0] = ImmaterialResourceManager.Resource.HealthCare;
+                resources[1] = ImmaterialResourceManager.Resource.DeathCare;
+                resources[2] = ImmaterialResourceManager.Resource.FireDepartment;
+                resources[3] = ImmaterialResourceManager.Resource.PoliceDepartment;
+                resources[4] = ImmaterialResourceManager.Resource.EducationElementary;
+                resources[5] = ImmaterialResourceManager.Resource.EducationHighSchool;
+                resources[6] = ImmaterialResourceManager.Resource.EducationUniversity;
+                resources[7] = ImmaterialResourceManager.Resource.PublicTransport;
+                resources[8] = ImmaterialResourceManager.Resource.PostService;
+                resources[9] = ImmaterialResourceManager.Resource.Entertainment;
+                resources[10] = ImmaterialResourceManager.Resource.FirewatchCoverage;
+                resources[11] = ImmaterialResourceManager.Resource.DisasterCoverage;
+                resources[12] = ImmaterialResourceManager.Resource.RadioCoverage;
+                resources[13] = ImmaterialResourceManager.Resource.NoisePollution;
+                resources[14] = ImmaterialResourceManager.Resource.Abandonment;
+
+                SetCharts(resources);
             }
             catch (Exception e)
             {
                 Debug.Log("[Show It!] ModManager:ShowOfficeCharts -> Exception: " + e.Message);
             }
+        }
+
+        private bool IsIndicatorAvailable(ImmaterialResourceManager.Resource resource)
+        {
+            InfoManager.InfoMode infoMode = InfoManager.InfoMode.LandValue;
+            InfoManager.SubInfoMode subInfoMode = InfoManager.SubInfoMode.Default;
+
+            GetIndicatorInfoModes(resource, out infoMode, out subInfoMode);
+
+            return Singleton<InfoManager>.instance.IsInfoModeAvailable(infoMode);
+
         }
 
         private bool IsIndicatorPositive(ImmaterialResourceManager.Resource resource)
@@ -593,6 +647,10 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.TourCoverage:
                     return true;
                 case ImmaterialResourceManager.Resource.PostService:
+                    return true;
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    return true;
+                case ImmaterialResourceManager.Resource.TaxBonus:
                     return true;
                 case ImmaterialResourceManager.Resource.None:
                     return false;
@@ -663,6 +721,10 @@ namespace ShowIt
                     return "Child Care";
                 case ImmaterialResourceManager.Resource.ElderCare:
                     return "Elder Care";
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    return "Cash Collecting";
+                case ImmaterialResourceManager.Resource.TaxBonus:
+                    return "Tax Bonus";
                 case ImmaterialResourceManager.Resource.None:
                     return "None";
                 default:
@@ -732,6 +794,10 @@ namespace ShowIt
                     return "InfoIconPopulation";
                 case ImmaterialResourceManager.Resource.ElderCare:
                     return "InfoIconAge";
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    return "InfoIconFinancial";
+                case ImmaterialResourceManager.Resource.TaxBonus:
+                    return "InfoIconFinancial";
                 case ImmaterialResourceManager.Resource.None:
                     return "ToolbarIconHelp";
                 default:
@@ -861,6 +927,14 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.ElderCare:
                     infoMode = InfoManager.InfoMode.Health;
                     subInfoMode = InfoManager.SubInfoMode.ElderCare;
+                    break;
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    infoMode = InfoManager.InfoMode.Financial;
+                    subInfoMode = InfoManager.SubInfoMode.FinancialBank;
+                    break;
+                case ImmaterialResourceManager.Resource.TaxBonus:
+                    infoMode = InfoManager.InfoMode.Financial;
+                    subInfoMode = InfoManager.SubInfoMode.FinancialStock;
                     break;
                 case ImmaterialResourceManager.Resource.None:
                     infoMode = InfoManager.InfoMode.LandValue;

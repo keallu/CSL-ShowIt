@@ -33,7 +33,7 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 100, 500, 50, 100);
                 case ImmaterialResourceManager.Resource.LandValue:
                 case ImmaterialResourceManager.Resource.Attractiveness:
-                case ImmaterialResourceManager.Resource.Coverage:                    
+                case ImmaterialResourceManager.Resource.Coverage:
                 case ImmaterialResourceManager.Resource.FireHazard:
                     return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
@@ -61,6 +61,8 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
                 case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:
@@ -114,6 +116,8 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
                 case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:

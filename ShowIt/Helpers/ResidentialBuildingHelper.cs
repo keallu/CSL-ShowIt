@@ -42,7 +42,7 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, averageResidentRequirement, 500, 30, 60);
                 case ImmaterialResourceManager.Resource.LandValue:
                 case ImmaterialResourceManager.Resource.Attractiveness:
-                case ImmaterialResourceManager.Resource.Coverage:                    
+                case ImmaterialResourceManager.Resource.Coverage:
                 case ImmaterialResourceManager.Resource.FireHazard:
                     return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
@@ -69,7 +69,9 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, averageResidentRequirement, 200, 5, 10);
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
-                case ImmaterialResourceManager.Resource.ElderCare:                    
+                case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:
@@ -94,16 +96,16 @@ namespace ShowIt
                     return 40;
                 case ImmaterialResourceManager.Resource.NoisePollution:
                     return 100;
-                case ImmaterialResourceManager.Resource.CrimeRate:                    
+                case ImmaterialResourceManager.Resource.CrimeRate:
                 case ImmaterialResourceManager.Resource.Health:
-                case ImmaterialResourceManager.Resource.Wellbeing:                    
+                case ImmaterialResourceManager.Resource.Wellbeing:
                 case ImmaterialResourceManager.Resource.Density:
                     return 0;
                 case ImmaterialResourceManager.Resource.Entertainment:
                     return 60;
                 case ImmaterialResourceManager.Resource.LandValue:
                 case ImmaterialResourceManager.Resource.Attractiveness:
-                case ImmaterialResourceManager.Resource.Coverage:                    
+                case ImmaterialResourceManager.Resource.Coverage:
                 case ImmaterialResourceManager.Resource.FireHazard:
                     return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
@@ -125,6 +127,8 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
                 case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:

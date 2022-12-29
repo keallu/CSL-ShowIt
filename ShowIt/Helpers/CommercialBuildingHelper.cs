@@ -25,7 +25,7 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 10, 100, 0, 100);
                 case ImmaterialResourceManager.Resource.CrimeRate:
                 case ImmaterialResourceManager.Resource.Health:
-                case ImmaterialResourceManager.Resource.Wellbeing:                    
+                case ImmaterialResourceManager.Resource.Wellbeing:
                 case ImmaterialResourceManager.Resource.Density:
                     return 0;
                 case ImmaterialResourceManager.Resource.Entertainment:
@@ -33,7 +33,7 @@ namespace ShowIt
                     return ImmaterialResourceManager.CalculateResourceEffect(value, 100, 500, 50, 100);
                 case ImmaterialResourceManager.Resource.LandValue:
                 case ImmaterialResourceManager.Resource.Attractiveness:
-                case ImmaterialResourceManager.Resource.Coverage:                    
+                case ImmaterialResourceManager.Resource.Coverage:
                 case ImmaterialResourceManager.Resource.FireHazard:
                     return 0;
                 case ImmaterialResourceManager.Resource.Abandonment:
@@ -61,6 +61,10 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
                 case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out value);
+                    return ImmaterialResourceManager.CalculateResourceEffect(value, 50, 100, 20, 25);
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:
@@ -114,6 +118,9 @@ namespace ShowIt
                 case ImmaterialResourceManager.Resource.EducationLibrary:
                 case ImmaterialResourceManager.Resource.ChildCare:
                 case ImmaterialResourceManager.Resource.ElderCare:
+                case ImmaterialResourceManager.Resource.CashCollecting:
+                    return 25;
+                case ImmaterialResourceManager.Resource.TaxBonus:
                 case ImmaterialResourceManager.Resource.None:
                     return 0;
                 default:
